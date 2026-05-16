@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -9,6 +9,7 @@ from app.deps import get_current_user
 from app.models.trip import Trip
 from app.models.user import User
 from app.schemas.trip import TripCreate, TripPublic, TripUpdate
+from app.services.audit_log import record_trip_created
 
 router = APIRouter(tags=["Trips"])
 
@@ -16,6 +17,7 @@ router = APIRouter(tags=["Trips"])
 @router.post("", response_model=TripPublic)
 def create_trip(
     payload: TripCreate,
+    background_tasks: BackgroundTasks,
     db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ) -> Trip:
@@ -29,6 +31,12 @@ def create_trip(
     db.add(trip)
     db.commit()
     db.refresh(trip)
+    background_tasks.add_task(
+        record_trip_created,
+        trip_id=trip.id,
+        user_id=current_user.id,
+        destination=trip.destination,
+    )
     return trip
 
 

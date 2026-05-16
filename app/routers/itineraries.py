@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -10,6 +10,7 @@ from app.models.itinerary import Itinerary
 from app.models.trip import Trip
 from app.models.user import User
 from app.schemas.itinerary import ItineraryCreate, ItineraryCreateResponse, ItineraryDayPublic, ItineraryPublic
+from app.services.audit_log import record_itinerary_saved
 
 router = APIRouter(tags=["Itineraries"])
 
@@ -29,6 +30,7 @@ def _payload_to_public_days(payload: list) -> list[ItineraryDayPublic]:
 @router.post("", response_model=ItineraryCreateResponse)
 def create_or_update_itinerary(
     payload: ItineraryCreate,
+    background_tasks: BackgroundTasks,
     db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ) -> ItineraryCreateResponse:
@@ -46,6 +48,13 @@ def create_or_update_itinerary(
 
     db.commit()
     db.refresh(row)
+
+    background_tasks.add_task(
+        record_itinerary_saved,
+        trip_id=payload.trip_id,
+        user_id=current_user.id,
+        day_count=len(payload.days),
+    )
 
     return ItineraryCreateResponse(
         trip_id=payload.trip_id,
