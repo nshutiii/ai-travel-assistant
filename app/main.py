@@ -12,6 +12,14 @@ from app.routers.users import router as users_router
 
 settings = get_settings()
 
+_OPENAPI_TAGS = [
+    {"name": "Health", "description": "Liveness for monitoring and local smoke checks."},
+    {"name": "Auth", "description": "Register and obtain a JWT access token."},
+    {"name": "Users", "description": "Authenticated user profile."},
+    {"name": "Trips", "description": "CRUD for trips owned by the current user."},
+    {"name": "Itineraries", "description": "Create and fetch itineraries linked to a trip."},
+]
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -25,8 +33,13 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title=settings.app_name,
+    description=(
+        "REST API for trip planning: JWT auth, trips, itineraries, and audit hooks "
+        "after writes. See the repository README for setup and curl examples."
+    ),
     version="0.1.0",
     lifespan=lifespan,
+    openapi_tags=_OPENAPI_TAGS,
 )
 
 app.include_router(health_router)
