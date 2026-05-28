@@ -10,9 +10,7 @@ from app.models.itinerary import Itinerary
 from app.models.trip import Trip
 from app.models.user import User
 from app.schemas.itinerary import ItineraryCreate, ItineraryCreateResponse, ItineraryDayPublic, ItineraryPublic
-from app.services.ai_itinerary import generate_ai_itinerary
-from app.services.free_ai import generate_free_ai_itinerary
-from app.services.smart_knowledge import generate_smart_itinerary
+from app.services.itinerary_manager import generate_itinerary_fast
 from app.services.audit_log import record_itinerary_saved
 
 router = APIRouter(tags=["Itineraries"])
@@ -39,26 +37,8 @@ def generate_and_save_ai_itinerary(
 ) -> ItineraryCreateResponse:
     trip = _trip_owned_or_404(db, trip_id, current_user.id)
 
-    ai_days = []
-    
-    # 1. Try Free AI (GPT-4o via GPT4Free - no key required, high quality)
-    try:
-        ai_days = generate_free_ai_itinerary(trip.destination, trip.days, trip.trip_style, trip.budget)
-    except Exception:
-        pass
-
-    # 2. Try Gemini AI (as secondary)
-    if not ai_days:
-        try:
-            ai_days = generate_ai_itinerary(trip.destination, trip.days, trip.trip_style, trip.budget)
-            if ai_days and "Explore the center" in ai_days[0]["activities"][0]:
-                ai_days = [] # Reject generic fallback
-        except Exception:
-            pass
-
-    # 3. Final Fallback to Smart Knowledge Base (Local data for top cities)
-    if not ai_days:
-        ai_days = generate_smart_itinerary(trip.destination, trip.days, trip.trip_style, trip.budget)
+    # Use the fast itinerary manager which runs providers in parallel and caches results
+    ai_days = generate_itinerary_fast(trip.destination, trip.days, trip.trip_style, trip.budget)
 
     # Save to DB
     existing = db.scalars(select(Itinerary).where(Itinerary.trip_id == trip_id)).first()
