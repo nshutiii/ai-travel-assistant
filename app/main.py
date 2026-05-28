@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.core.config import get_settings
@@ -58,4 +59,12 @@ app.include_router(users_router, prefix="/users")
 app.include_router(trips_router, prefix="/trips")
 app.include_router(itineraries_router, prefix="/itineraries")
 
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+# Mount static assets under /static prefix
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+# Serve the SPA index.html at root
+@app.get("/", include_in_schema=False)
+async def serve_root():
+    return FileResponse("static/index.html")
+

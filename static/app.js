@@ -299,14 +299,26 @@ async function loadDashboard() {
 
 // MODAL CONTROLS
 const modal = document.getElementById('modal-create-trip');
+const modalFirstInput = document.getElementById('trip-destination');
+const btnOpenCreate = document.getElementById('btn-open-create');
+
 document.getElementById('btn-open-create').addEventListener('click', () => {
     modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden', 'false');
+    // Move focus into the dialog
+    setTimeout(() => modalFirstInput.focus(), 120);
 });
+
 document.getElementById('btn-close-modal').addEventListener('click', () => {
     modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden', 'true');
+    btnOpenCreate.focus();
 });
+
 document.getElementById('btn-cancel-trip').addEventListener('click', () => {
     modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden', 'true');
+    btnOpenCreate.focus();
 });
 
 // CREATE NEW TRIP
@@ -361,6 +373,7 @@ async function openItinerary(tripId, forceGenerate = false) {
         const loaderProgress = document.getElementById('loader-progress-fill');
         
         loader.classList.remove('hidden');
+        loader.setAttribute('aria-hidden', 'false');
         loaderMsg.innerText = `Searching for top accommodations & dining in ${trip.destination}...`;
         
         try {
@@ -372,6 +385,7 @@ async function openItinerary(tripId, forceGenerate = false) {
             showToast('AI failed. Creating dynamic smart local layout.', 'warning');
         } finally {
             loader.classList.add('hidden');
+            loader.setAttribute('aria-hidden', 'true');
         }
     }
     

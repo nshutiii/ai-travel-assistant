@@ -11,7 +11,7 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- CSS -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <!-- Ambient Background Blobs -->
@@ -21,7 +21,7 @@
 
     <div class="app-container">
         <!-- HEADER -->
-        <header class="app-header glass">
+        <header class="app-header glass" role="banner" aria-label="Main header">
             <div class="logo">
                 <span class="logo-icon"><i class="fa-solid fa-plane-departure"></i></span>
                 <h1>Antigravity <span class="gradient-text">Travel</span></h1>
@@ -32,7 +32,7 @@
             </nav>
         </header>
 
-        <main class="app-main-content">
+        <main class="app-main-content" role="main">
             <!-- VIEW 1: AUTH (Login & Register side-by-side or togglable) -->
             <section id="view-auth" class="auth-section">
                 <div class="auth-card glass card-glow">
@@ -219,10 +219,10 @@
     </div>
 
     <!-- MODAL: CREATE NEW TRIP -->
-    <div class="modal-overlay hidden" id="modal-create-trip">
+    <div class="modal-overlay hidden" id="modal-create-trip" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="modal-create-title" tabindex="-1">
         <div class="modal-content glass card-glow">
             <div class="modal-header">
-                <h2><i class="fa-solid fa-compass"></i> Create a New Travel Plan</h2>
+                <h2 id="modal-create-title"><i class="fa-solid fa-compass"></i> Create a New Travel Plan</h2>
                 <button class="btn-close" id="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <form id="form-create-trip" class="form">
@@ -259,7 +259,7 @@
     </div>
 
     <!-- LOADER OVERLAY (For AI Itinerary Generation) -->
-    <div class="loader-overlay hidden" id="loader-overlay">
+    <div class="loader-overlay hidden" id="loader-overlay" role="status" aria-live="polite" aria-hidden="true">
         <div class="loader-card glass card-glow">
             <div class="spinner-container">
                 <div class="pulse-loader"></div>
@@ -274,12 +274,12 @@
     </div>
 
     <!-- Notification Toast -->
-    <div id="toast" class="toast hidden">
+    <div id="toast" class="toast hidden" role="status" aria-live="polite" aria-atomic="true">
         <span id="toast-icon"><i class="fa-solid fa-info-circle"></i></span>
         <span id="toast-text">Notification message</span>
     </div>
 
     <!-- JS -->
-    <script src="app.js"></script>
+    <script src="/static/app.js"></script>
 </body>
 </html>
