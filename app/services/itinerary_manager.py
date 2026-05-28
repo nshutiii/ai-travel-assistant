@@ -13,6 +13,12 @@ def _generate_uncached(destination: str, days: int, trip_style: str, budget: flo
 
     If none return a usable result within the timeout, fall back to the local smart knowledge generator.
     """
+    # Coerce budget to float to avoid Decimal * float TypeErrors from SQLAlchemy
+    try:
+        budget = float(budget)
+    except Exception:
+        budget = float(str(budget))
+
     providers = [generate_free_ai_itinerary, generate_ai_itinerary]
 
     with ThreadPoolExecutor(max_workers=len(providers)) as ex:
@@ -44,4 +50,13 @@ def generate_itinerary_fast(destination: str, days: int, trip_style: str, budget
 
     Caching helps repeated requests for the same parameters return instantly.
     """
-    return _generate_uncached(destination, days, trip_style, budget, timeout)
+    # Ensure inputs are primitive types for stable caching keys
+    try:
+        budget_f = float(budget)
+    except Exception:
+        budget_f = float(str(budget))
+    days_i = int(days)
+    trip_style_s = str(trip_style).lower().strip() if trip_style else ""
+    destination_s = str(destination).strip()
+
+    return _generate_uncached(destination_s, days_i, trip_style_s, budget_f, timeout)
