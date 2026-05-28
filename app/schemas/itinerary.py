@@ -16,6 +16,11 @@ class ItineraryDayPublic(BaseModel):
 
     day: int
     activities: list[str]
+    accommodation: str | None = None
+    accommodation_cost: float | None = None
+    food_cost: float | None = None
+    other_cost: float | None = None
+    total_day_cost: float | None = None
 
 
 class ItineraryPublic(BaseModel):

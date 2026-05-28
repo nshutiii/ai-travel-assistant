@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.core.config import get_settings
 from app.core.database import Base, engine
@@ -42,8 +44,18 @@ app = FastAPI(
     openapi_tags=_OPENAPI_TAGS,
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(health_router)
 app.include_router(auth_router, prefix="/auth")
 app.include_router(users_router, prefix="/users")
 app.include_router(trips_router, prefix="/trips")
 app.include_router(itineraries_router, prefix="/itineraries")
+
+app.mount("/", StaticFiles(directory="static", html=True), name="static")

@@ -3,3 +3,7 @@
 __pycache__/
 *.pyc
 test_app.db
+.venv/
+ai_travel_assistant.db
+*.log
+

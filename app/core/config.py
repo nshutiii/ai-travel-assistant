@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "change-me-in-production-use-a-long-random-secret"
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60 * 24 * 7
+    gemini_api_key: str | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env",
