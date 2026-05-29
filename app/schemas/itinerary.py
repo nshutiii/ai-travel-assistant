@@ -30,3 +30,5 @@ class ItineraryPublic(BaseModel):
 
 class ItineraryCreateResponse(ItineraryPublic):
     message: str = "Itinerary created successfully"
+    airfare_estimate: float | None = None
+    budget_used_for_itinerary: float | None = None

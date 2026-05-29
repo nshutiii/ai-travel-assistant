@@ -322,22 +322,40 @@ document.getElementById('btn-cancel-trip').addEventListener('click', () => {
 });
 
 // CREATE NEW TRIP
+const requireFlightCheckbox = document.getElementById('trip-require-flight');
+const originGroup = document.getElementById('trip-origin-group');
+requireFlightCheckbox.addEventListener('change', (e) => {
+    if (e.target.checked) {
+        originGroup.classList.remove('hidden');
+    } else {
+        originGroup.classList.add('hidden');
+    }
+});
+
 document.getElementById('form-create-trip').addEventListener('submit', async (e) => {
     e.preventDefault();
     const destination = document.getElementById('trip-destination').value;
     const days = parseInt(document.getElementById('trip-days').value);
     const budget = parseFloat(document.getElementById('trip-budget').value);
     const trip_style = document.getElementById('trip-style').value;
-    
+    const need_flight = requireFlightCheckbox.checked;
+    const origin = document.getElementById('trip-origin').value || null;
+
     try {
         const trip = await apiRequest('/trips', {
             method: 'POST',
-            body: JSON.stringify({ destination, days, budget, trip_style })
+            body: JSON.stringify({ destination, days, budget, trip_style, need_flight, origin })
         });
         
         showToast('Trip created successfully! Launching AI Planner...', 'success');
         modal.classList.add('hidden');
         document.getElementById('form-create-trip').reset();
+        // Trigger AI Generation immediately
+        openItinerary(trip.id, true);
+    } catch (error) {
+        showToast(error.message || 'Create trip failed', 'error');
+    }
+});
         
         // Trigger AI Generation immediately
         openItinerary(trip.id, true);
@@ -393,6 +411,12 @@ async function openItinerary(tripId, forceGenerate = false) {
         state.currentItinerary = itinerary;
         state.currentDay = 1;
         switchView('itinerary');
+        // Show airfare if present
+        if (itinerary.airfare_estimate) {
+            document.getElementById('itin-airfare').innerText = `$${parseFloat(itinerary.airfare_estimate).toFixed(2)}`;
+        } else {
+            document.getElementById('itin-airfare').innerText = '$0.00';
+        }
         renderItinerary();
     } else {
         showToast('Could not load itinerary.', 'error');

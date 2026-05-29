@@ -27,6 +27,8 @@ def create_trip(
         days=payload.days,
         budget=payload.budget,
         trip_style=payload.trip_style,
+        need_flight=bool(payload.need_flight),
+        origin=payload.origin
     )
     db.add(trip)
     db.commit()

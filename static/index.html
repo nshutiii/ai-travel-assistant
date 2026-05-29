@@ -158,6 +158,10 @@
                                     <strong id="itin-estimated-cost">$0.00</strong>
                                 </div>
                                 <div class="legend-row">
+                                    <span><i class="fa-solid fa-plane text-muted"></i> Airfare (estimated):</span>
+                                    <strong id="itin-airfare">$0.00</strong>
+                                </div>
+                                <div class="legend-row">
                                     <span><i class="fa-solid fa-circle text-pink"></i> Remaining Buffer:</span>
                                     <strong id="itin-remaining-budget">$0.00</strong>
                                 </div>
@@ -248,6 +252,16 @@
                             <option value="business">Business / Bleisure</option>
                             <option value="luxury">High-End Luxury</option>
                         </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="trip-require-flight"><i class="fa-solid fa-plane"></i> Require flights?</label>
+                        <input type="checkbox" id="trip-require-flight">
+                    </div>
+                    <div class="form-group hidden" id="trip-origin-group">
+                        <label for="trip-origin"><i class="fa-solid fa-location-dot"></i> Your Origin City</label>
+                        <input type="text" id="trip-origin" placeholder="e.g. London, NYC, Berlin">
+                        <small class="subtitle">Used to estimate airfare and include in budget.</small>
                     </div>
                 </div>
                 <div class="modal-actions">

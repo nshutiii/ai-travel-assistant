@@ -6,6 +6,9 @@ class TripBase(BaseModel):
     days: int = Field(ge=1, le=365)
     budget: float = Field(gt=0)
     trip_style: str = Field(min_length=1, max_length=50)
+    # Flight options
+    need_flight: bool = Field(default=False)
+    origin: str | None = Field(default=None, min_length=1, max_length=255)
 
 
 class TripCreate(TripBase):

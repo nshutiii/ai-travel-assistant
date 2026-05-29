@@ -11,6 +11,7 @@ from app.models.trip import Trip
 from app.models.user import User
 from app.schemas.itinerary import ItineraryCreate, ItineraryCreateResponse, ItineraryDayPublic, ItineraryPublic
 from app.services.itinerary_manager import generate_itinerary_fast
+from app.services.flight_search import search_affordable_airfare
 from app.services.audit_log import record_itinerary_saved
 
 router = APIRouter(tags=["Itineraries"])
@@ -37,8 +38,30 @@ def generate_and_save_ai_itinerary(
 ) -> ItineraryCreateResponse:
     trip = _trip_owned_or_404(db, trip_id, current_user.id)
 
+    # Estimate airfare if user needs a flight
+    airfare = None
+    if getattr(trip, 'need_flight', False) and getattr(trip, 'origin', None):
+        try:
+            airfare = search_affordable_airfare(trip.origin, trip.destination)
+        except Exception:
+            airfare = None
+
+    # Deduct airfare from budget when asking AI to plan daily costs
+    budget_for_ai = float(trip.budget)
+    if airfare:
+        try:
+            budget_for_ai = max(0.0, float(trip.budget) - float(airfare))
+            # persist the estimate on the trip row
+            trip.airfare_estimate = airfare
+            db.add(trip)
+            db.commit()
+            db.refresh(trip)
+        except Exception:
+            # ignore persistence errors
+            pass
+
     # Use the fast itinerary manager which runs providers in parallel and caches results
-    ai_days = generate_itinerary_fast(trip.destination, trip.days, trip.trip_style, trip.budget)
+    ai_days = generate_itinerary_fast(trip.destination, trip.days, trip.trip_style, budget_for_ai)
 
     # Save to DB
     existing = db.scalars(select(Itinerary).where(Itinerary.trip_id == trip_id)).first()
@@ -63,6 +86,8 @@ def generate_and_save_ai_itinerary(
         trip_id=trip_id,
         itinerary=_payload_to_public_days(row.days_payload),
         message="Itinerary generated successfully",
+        airfare_estimate=float(row.__dict__.get('airfare_estimate')) if getattr(row, 'airfare_estimate', None) else None,
+        budget_used_for_itinerary=float(budget_for_ai) if 'budget_for_ai' in locals() else float(trip.budget)
     )
 
 
