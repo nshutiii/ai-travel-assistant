@@ -1,4 +1,5 @@
 // API Configuration
+console.log("app.js loaded");
 const API_BASE = window.location.origin;
 
 // State Management
@@ -111,26 +112,34 @@ function switchView(viewName) {
 }
 
 // Handle Login
-document.getElementById('form-login').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
-    
-    try {
-        const data = await apiRequest('/auth/login', {
-            method: 'POST',
-            body: JSON.stringify({ email, password })
+window.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.getElementById('form-login');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            console.log("Login form submitted via robust listener");
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            try {
+                const data = await apiRequest('/auth/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ email, password })
+                });
+                
+                state.token = data.access_token;
+                localStorage.setItem('token', data.access_token);
+                showToast('Successfully signed in!', 'success');
+                
+                // Reset forms
+                document.getElementById('form-login').reset();
+                await checkAuth();
+            } catch (error) {
+                showToast(error.message || 'Login failed', 'error');
+            }
         });
-        
-        state.token = data.access_token;
-        localStorage.setItem('token', data.access_token);
-        showToast('Successfully signed in!', 'success');
-        
-        // Reset forms
-        document.getElementById('form-login').reset();
-        await checkAuth();
-    } catch (error) {
-        showToast(error.message || 'Login failed', 'error');
+    } else {
+        console.error("Login form not found");
     }
 });
 
@@ -354,13 +363,6 @@ document.getElementById('form-create-trip').addEventListener('submit', async (e)
         openItinerary(trip.id, true);
     } catch (error) {
         showToast(error.message || 'Create trip failed', 'error');
-    }
-});
-        
-        // Trigger AI Generation immediately
-        openItinerary(trip.id, true);
-    } catch (error) {
-        showToast(error.message, 'error');
     }
 });
 

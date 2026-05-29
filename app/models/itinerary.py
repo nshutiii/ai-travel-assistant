@@ -6,6 +6,7 @@ from app.core.database import Base
 
 class Itinerary(Base):
     __tablename__ = "itineraries"
+    __allow_unmapped__ = True
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     trip_id: Mapped[int] = mapped_column(
